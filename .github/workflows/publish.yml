@@ -6,21 +6,31 @@ name: Node.js Package
 on:
   release:
     types: [created]
+  push:
+    branches: [main]
+  pull_request:
+    branches: '*'
 
 jobs:
   build:
-    runs-on: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
+    
+    strategy:
+      matrix:
+        node-version: [10.x, 12.x, 14.x, 15.x, 16.x]
+        os: [ubuntu-latest, windows-latest]
+        
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: ${{matrix.node-version}}
       - run: npm ci
       - run: npm test
 
   publish-gpr:
     needs: build
-    runs-on: [ubuntu-latest, windows-latest]
+    runs-on: ${{matrix.os}}
     permissions:
       contents: read
       packages: write
